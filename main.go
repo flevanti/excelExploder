@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"github.com/flevanti/mongodbClient"
 	_ "github.com/joho/godotenv/autoload"
+	"os"
 )
 
 func main() {
-	mdb, err := mongodbClient.Connect("mongodb+srv://appuser:appuser@cluster0-nnhfc.mongodb.net/test?retryWrites=true", "testdb");
+
+	mdb, err := mongodbClient.Connect(os.Getenv("DBCONNSTRING"), os.Getenv("DBDATABASE"))
 	if err != nil {
 		fmt.Println(err)
 		return
