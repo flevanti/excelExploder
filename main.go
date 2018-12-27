@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/flevanti/mongodbClient"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/mongodb/mongo-go-driver/bson"
 	"os"
 )
 
@@ -29,6 +31,19 @@ func main() {
 		fmt.Println("No collections found")
 	}
 
+	result, err := mdb.Db.Collection("hellothere").InsertOne(
+		context.Background(),
+		bson.D{
+			{"item", "canvas"},
+			{"qty", 100},
+			{"tags", bson.A{"cotton"}},
+			{"size", bson.D{
+				{"h", 28},
+				{"w", 35.5},
+				{"uom", "cm"},
+			}},
+		})
+	result = result
 	//fmt.Printf("hello %v", isAwsLambda.IsItInitialised())
 	//fmt.Printf("hello %v", isAwsLambda.IsItLambda())
 	//fmt.Printf("hello %v", isAwsLambda.IsItInitialised())
