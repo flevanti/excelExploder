@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/flevanti/goUtils"
 	"github.com/flevanti/isAwsLambda"
 	"github.com/flevanti/mongodbClient"
 	_ "github.com/joho/godotenv/autoload"
@@ -60,7 +63,7 @@ func main() {
 		lambda.Start(Handler)
 	} else {
 		// because we are calling the handler manually, we load a payload (a dummy one)
-		err := loadDummyPayload()
+		payload, err := LoadDummyPayload()
 		if err != nil {
 			fmt.Printf("Unable to load dummy payload: %s 💥 💥 💥 \n", err)
 			return
@@ -121,4 +124,24 @@ func Handler(payload payloadType) {
 	//fmt.Printf("hello %v", isAwsLambda.IsItLambda())
 	//fmt.Printf("hello %v", isAwsLambda.IsItInitialised())
 
+}
+
+func LoadDummyPayload() (payloadType, error) {
+	dummyPayloadFile := os.Getenv("DUMMYPAYLOADFILE")
+	if len(dummyPayloadFile) == 0 {
+		return payloadType{}, errors.New("dummy payload filename not found in configuration file")
+	}
+	if goUtils.FileExists(dummyPayloadFile) == false {
+		return payloadType{}, errors.New(fmt.Sprintf("dummy payload filename provided `%s` not found", dummyPayloadFile))
+	}
+	dummypayloadfileContent, err := goUtils.ReadFileContent(dummyPayloadFile)
+	if err != nil {
+		return payloadType{}, err
+	}
+	var payload payloadType
+	err = json.Unmarshal([]byte(dummypayloadfileContent), &payload)
+	if err != nil {
+		return payloadType{}, err
+	}
+	return payload, nil
 }
